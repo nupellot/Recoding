@@ -28,52 +28,40 @@ public:
 
 
 int main(int argv, char **argc) {
-  int ToDecimal(string Number);
-	char TranslateSymbol(char c, vector<translation> Translations);
-  // if (argv != 4) {
-  //   printf("Use correct format: ./a.out source result code\n");
-  //   return 1;
-  // }
+	vector<translation> GetTranslations(string CodeFileName);
+	void PrintTranslations(vector<translation>);
+	void Convert(string, string, vector<translation>&);
 
-  // FILE *SourceFile = fopen(argc[1], "r");
-  // FILE *ResultFile = fopen(argc[2], "w");
-  ifstream CodeFile("code");
-	ifstream SourceFile("source");
-	ofstream ResultFile("result");
-	if (!CodeFile.is_open() || !SourceFile.is_open() || !ResultFile.is_open()) {
-		printf("Ошибка открытия файла\n");
-		return 2;
+	if (argv != 4) {
+		cout << "Correct format: ./a.out source result code";
+		exit(1);
 	}
+	
+	vector<translation> Translations = GetTranslations(argc[3]);
+	PrintTranslations(Translations);
+	Convert(argc[1], argc[2], Translations);
+}
 
-  // printf("%s %d", argc[2], ToDecimal(argc[2], 3));
 
-	string Old;
-	string New;
-	vector<translation> Translations;
-	cout << "Jopa1" << endl;
-	while (!CodeFile.eof()) {
-		// cout << "Jopa2" << endl;
-		CodeFile >> Old;
-		CodeFile >> New;
-		cout << Old << " " << New << endl;
-		Translations.emplace_back(translation(ToDecimal(Old), ToDecimal(New)));
+void Convert(string SourceFileName, string ResultFileName, vector<translation>& Translations) {
+	ifstream SourceFile(SourceFileName);  // Text to translate.
+	ofstream ResultFile(ResultFileName);  // Destination of Translation.
+	if (!SourceFile.is_open() || !ResultFile.is_open()) {
+		printf("File opening error\n");
+		exit(3);
 	}
-
-
-	for (int i = 0; i < Translations.size(); i++) {
-		Translations[i].Print();
-	}
-
-
+	char TranslateSymbol(char, vector<translation>&);
+	cout << "---> Converting process <---" << endl;
 	while (!SourceFile.eof()) {
 		char c;
 		SourceFile.get(c);
 		ResultFile << TranslateSymbol(c, Translations);
+		cout << c << " -> " << TranslateSymbol(c, Translations) << endl;
 	}
 }
 
-
-char TranslateSymbol(char c, vector<translation> Translations) {
+// Converts symbol using dictionary. 
+char TranslateSymbol(char c, vector<translation>& Translations) {
 	for (int i = 0; i < Translations.size(); i++) {
 		if (Translations[i].OldCode == (int)c) {
 			return (char)Translations[i].NewCode;
@@ -82,6 +70,14 @@ char TranslateSymbol(char c, vector<translation> Translations) {
 	return c;
 }
 
+// Prints all the translations in dictionary.
+void PrintTranslations(vector<translation> Translations) {
+	for (int i = 0; i < Translations.size(); i++) {
+		Translations[i].Print();
+	}
+}
+
+// Converts hexadecimal number to decimal number.
 int ToDecimal(string Number) {
   int result = 0;
   for (int i = 0; i < Number.length(); i++) {
@@ -95,4 +91,24 @@ int ToDecimal(string Number) {
     }
   }
   return result;
+}
+
+vector<translation> GetTranslations(string CodeFileName) {
+  ifstream CodeFile(CodeFileName);  // Translation codes.
+	if (!CodeFile.is_open()) {  // Making sure file opened successfully.
+		printf("File opening error\n");
+		exit(2);
+	}
+	vector<translation> Translations;
+	string Old;
+	string New;
+	cout << "Dictionary:" << endl;
+	while (!CodeFile.eof()) {
+		CodeFile >> Old;
+		CodeFile >> New;
+		cout << Old << " " << New << endl;
+		Translations.emplace_back(translation(ToDecimal(Old), ToDecimal(New)));
+	}
+
+	return Translations;
 }
