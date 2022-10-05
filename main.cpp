@@ -29,7 +29,7 @@ public:
 
 int main(int argv, char **argc) {
   int ToDecimal(string Number);
-
+	char TranslateSymbol(char c, vector<translation> Translations);
   // if (argv != 4) {
   //   printf("Use correct format: ./a.out source result code\n");
   //   return 1;
@@ -39,7 +39,8 @@ int main(int argv, char **argc) {
   // FILE *ResultFile = fopen(argc[2], "w");
   ifstream CodeFile("code");
 	ifstream SourceFile("source");
-	if (!CodeFile.is_open()) {
+	ofstream ResultFile("result");
+	if (!CodeFile.is_open() || !SourceFile.is_open() || !ResultFile.is_open()) {
 		printf("Ошибка открытия файла\n");
 		return 2;
 	}
@@ -58,9 +59,27 @@ int main(int argv, char **argc) {
 		Translations.emplace_back(translation(ToDecimal(Old), ToDecimal(New)));
 	}
 
+
 	for (int i = 0; i < Translations.size(); i++) {
 		Translations[i].Print();
 	}
+
+
+	while (!SourceFile.eof()) {
+		char c;
+		SourceFile.get(c);
+		ResultFile << TranslateSymbol(c, Translations);
+	}
+}
+
+
+char TranslateSymbol(char c, vector<translation> Translations) {
+	for (int i = 0; i < Translations.size(); i++) {
+		if (Translations[i].OldCode == (int)c) {
+			return (char)Translations[i].NewCode;
+		}
+	}
+	return c;
 }
 
 int ToDecimal(string Number) {
